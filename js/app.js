@@ -23,7 +23,6 @@ $(document).ready(function(){
 	let songs = [];
 	let audio = [];
 
-	getToken();
 
 	$(".buttonSubmit").on("click", function(){
 		value = $(".date").val();
@@ -31,7 +30,7 @@ $(document).ready(function(){
 			index = 1;
 			songs = [];
 			audio = [];
-			getDates();
+			getToken();
 		}
 	});
 
@@ -57,6 +56,10 @@ $(document).ready(function(){
 	});
 
 	function getToken() {
+		$(".infoText").empty();
+		$(".infoText").removeClass("scroll");
+		$(".infoText").append("Loading");
+		$(".infoText").addClass("loading");
 		$.ajax({
 			method: "POST",
 			url: proxy + "https://accounts.spotify.com/api/token",
@@ -66,6 +69,7 @@ $(document).ready(function(){
 			datatype: "jsonp",
 			success: function(data){
 				accessToken.push(data);
+				getDates();
 			}
 		})
 	}
@@ -85,8 +89,8 @@ $(document).ready(function(){
 
 	function playAudio(){
 		if(currentlyPlaying){
-			currentSong = $(".title" + currentButton).text();
-			currentArtist = $(".artist" + currentButton).text();
+			currentSong = songs[currentButton - 1][0].song_name;
+			currentArtist = songs[currentButton - 1][0].display_artist;
 			let canPlay = $(currentlyPlaying).attr("src");
 			if(canPlay != "null"){
 				$(".infoText").empty();
