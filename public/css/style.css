@@ -318,8 +318,8 @@ input::-webkit-calendar-picker-indicator {
 	padding-right: 5px;
 }
 
-#author {
-  padding-top: 25px;
+.author {
+  padding-top: 10px;
   text-align: center;
   color: #dfdfdf;
   font-family: Raleway;
