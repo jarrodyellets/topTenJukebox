@@ -1,3 +1,0 @@
-*.gitattributes text
-.gitignore css
-*.md text
