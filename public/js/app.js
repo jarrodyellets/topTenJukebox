@@ -23,7 +23,7 @@ $(document).ready(function(){
 	let songs = [];
 	let audio = [];
 
-
+//Button event handlers
 	$(".buttonSubmit").on("click", function(){
 		value = $(".date").val();
 		if(value){
@@ -55,6 +55,7 @@ $(document).ready(function(){
 		}
 	});
 
+//Get Spotify API token
 	function getToken() {
 		$(".infoText").empty();
 		$(".infoText").removeClass("scroll");
@@ -70,6 +71,7 @@ $(document).ready(function(){
 		})
 	}
 
+//Load song preview
 	function loadAudio(){
 		if(currentlyPlaying){
 			currentlyPlaying.pause();
@@ -83,6 +85,7 @@ $(document).ready(function(){
 		playAudio();
 	}
 
+//Play songs on jukebox
 	function playAudio(){
 		if(currentlyPlaying){
 			currentSong = songs[currentButton - 1][0].song_name;
@@ -101,6 +104,7 @@ $(document).ready(function(){
 		}
 	}
 
+//Get Billboard charts for selected date
 	function getCharts(index){
 		$(".infoText").removeClass("scroll");
 		$(".infoText").empty();
@@ -118,6 +122,7 @@ $(document).ready(function(){
 		});
 	}
 
+//Get songs from Spotify
 	function getAudio(){
 		songId = songs[songs.length - 1][0].spotify_id;
 		songName = songs[songs.length - 1][0].song_name;
@@ -153,6 +158,7 @@ $(document).ready(function(){
 		getCharts(index);
 	}
 
+//Show songs on jukebox
 	function printBoard(){
 		$(".infoText").empty();
 		$(".infoText").append("Pick Song");
@@ -164,6 +170,7 @@ $(document).ready(function(){
 		checkAudio();
 	}
 
+//Check if song has preview or not
 	function checkAudio(){
 		for(var i = 1; i <= songs.length; i++){
 			let j = i - 1;
