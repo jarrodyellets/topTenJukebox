@@ -4,7 +4,6 @@ $(document).ready(function(){
 	const spotifyUrl = "https://api.spotify.com/v1/"
 	const headIcon = "<i class='fas fa-headphones'></i>";
 	const spotIcon = "<i class='fab fa-spotify'></i>";
-	let billboard = require("billboard-top-100").getChart;
 	let idUrl;
 	let artistUrl;
 	let accessToken = [];
@@ -17,6 +16,7 @@ $(document).ready(function(){
 	let currentDate
 	let futureDate;
 	let index = 1;
+	let audioCounter = 0;
 	let songId;
 	let value;
 	let keyLength;
@@ -24,17 +24,12 @@ $(document).ready(function(){
 	let songs = [];
 	let audio = [];
 
-	billboard('billboard-200', '2013-05-24', function(songs, err){
-    if (err) console.log(err);
-    console.log(songs[3]); //prints array of top 100 songs
 
-});
-
-//Button event handlers
 	$(".buttonSubmit").on("click", function(){
 		value = $(".date").val();
 		if(value){
 			index = 1;
+			audioCounter = 0;
 			songs = [];
 			audio = [];
 			getToken();
@@ -42,7 +37,7 @@ $(document).ready(function(){
 	});
 
 	 $(".selectButton").on("click", function(){
- 		if(songs.length === 10){
+ 		if(songs[0].length === 10){
 	 		$(".song").removeClass("lightOn");
 	 		currentButton = $(this).attr("id").substr(6);
 			$(".song" + currentButton).addClass("lightOn");
@@ -62,7 +57,6 @@ $(document).ready(function(){
 		}
 	});
 
-//Get Spotify API token
 	function getToken() {
 		$(".infoText").empty();
 		$(".infoText").removeClass("scroll");
@@ -70,33 +64,28 @@ $(document).ready(function(){
 		$(".infoText").addClass("loading");
 		$.ajax({
 			method: "GET",
-			url: "https://sheltered-basin-77574.herokuapp.com/token",
+			url: "/token",
 			success: function(data){
 				accessToken.push(data);
 				getDates();
 			}
 		})
 	}
+	
 
-//Load song preview
 	function loadAudio(){
 		if(currentlyPlaying){
 			currentlyPlaying.pause();
 			currentlyPlaying.currentTime = 0;
 		}
-		if(Object.keys(audio[currentButton - 1]).length === 1){
-			currentlyPlaying = new Audio(audio[currentButton - 1].tracks.items[0].preview_url);
-		} else {
-			currentlyPlaying = new Audio(audio[currentButton - 1].preview_url);
-		}
+		currentlyPlaying = new Audio(audio[currentButton - 1].tracks.items[0].preview_url);
 		playAudio();
 	}
 
-//Play songs on jukebox
 	function playAudio(){
 		if(currentlyPlaying){
-			currentSong = songs[currentButton - 1][0].song_name;
-			currentArtist = songs[currentButton - 1][0].display_artist;
+			currentSong = songs[0][currentButton - 1].song_name;
+			currentArtist = songs[0][currentButton - 1].display_artist;
 			let canPlay = $(currentlyPlaying).attr("src");
 			if(canPlay != "null"){
 				$(".infoText").empty();
@@ -111,48 +100,46 @@ $(document).ready(function(){
 		}
 	}
 
-//Get Billboard charts for selected date
 	function getCharts(index){
 		$(".infoText").removeClass("scroll");
 		$(".infoText").empty();
 		$(".infoText").append("Loading Song " + (audio.length + 1) + "/10");
 		$(".infoText").addClass("loading");
 		$.ajax({
-			type: "GET",
-			url: proxy + billboardUrl + index + "?from=" + currentDate + "&to=" + futureDate,
-			header: { "Access-Control-Allow-Origin": "*://*/*" },
-			datatype: "json",
+			method: "GET",
+			url: "/billboard",
+			data: {date: currentDate},
 			success: function(data){
+				console.log("done");
 				songs.push(data);
 				getAudio();
 			}
 		});
 	}
 
-//Get songs from Spotify
 	function getAudio(){
-		songId = songs[songs.length - 1][0].spotify_id;
-		songName = songs[songs.length - 1][0].song_name;
-		artistName = songs[songs.length - 1][0].display_artist;
+		console.log(songs);
+		songName = songs[0][audioCounter].title;
+		artistName = songs[0][audioCounter].artist;
 		artist = artistName.replace(/\s+/g, '+');
-		artistUrl = spotifyUrl + "search?q=" + songName + "&type=track&limit=1" + "&market=US";
-		idUrl = spotifyUrl + "tracks/" + songId + "?market=US";
+		artistUrl = spotifyUrl + "search?q=track:" + songName + '%20artist:' + artist + "&type=track&limit=1" + "&market=US";
 		$.ajax({
 			type: "GET",
-			url: (songId) ? idUrl : artistUrl,
+			url: artistUrl,
 			contentType: "application/json",
 			headers: { "Authorization": "Bearer " + accessToken[0].token },
 			datatype: "json",
 			success: function(data){
 				audio.push(data);
-				if(songs.length === index && songs.length !== 10){
-					index++
-					getCharts(index);
-				} else if(songs.length === 10){
-					printBoard();
+				if(audioCounter < 9){
+					audioCounter++
+					getAudio();
+				} else {
+					printBoard()
 				}
 			}
 		})
+
 	}
 
 	function getDates(){
@@ -162,10 +149,9 @@ $(document).ready(function(){
 		currentDate = date.toISOString().substring(0, 10).replace(/-0+/g, '-');
 		newIsoDate = new Date(newDate);
 		futureDate = newIsoDate.toISOString().substring(0, 10).replace(/-0+/g, '-');
-		getCharts(index);
+		getCharts()
 	}
 
-//Show songs on jukebox
 	function printBoard(){
 		$(".infoText").empty();
 		$(".infoText").append("Pick Song");
@@ -177,13 +163,14 @@ $(document).ready(function(){
 		checkAudio();
 	}
 
-//Check if song has preview or not
 	function checkAudio(){
-		for(var i = 1; i <= songs.length; i++){
+		for(var i = 1; i <= songs[0].length; i++){
 			let j = i - 1;
+			console.log(audio);
 			keyLength = Object.keys(audio[j]).length;
-			$(".title" + i).append(songs[j][0].song_name.substring(0, 35));
-			$(".artist" + i).append(songs[j][0].display_artist.substring(0, 25));
+			console.log(songs[0][j]);
+			$(".title" + i).append(songs[0][j].title.substring(0, 35));
+			$(".artist" + i).append(songs[0][j].artist.substring(0, 25));
 			if(keyLength > 2 && audio[j].external_urls.spotify){
 	 			$(".s" + i).attr("href", audio[j].external_urls.spotify);
 	 			$(".spotify" + i).append(spotIcon);
