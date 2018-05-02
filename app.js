@@ -1,34 +1,55 @@
 var express = require("express"),
     app     = express(),
+    bodyParser = require("body-parser"),
     SpotifyWebApi = require('spotify-web-api-node'),
+    billboard = require("billboard-top-100").getChart,
     clientID = process.env.ID,
     clientSecret = process.env.SECRET,
-    token;
+    token,
+    date;
 
     
     
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
+app.use(bodyParser.urlencoded({extended: true}));
 
-init();
 
 app.get("/", function(req, res){
+    init();
     res.render("index");
 });
 
 app.get('/token', function(req, res){
+    console.log("token");
+    console.log(token);
   res.send({"token": token});
  });
+ 
+app.get('/billboard', function(req, res){
+    var dateString = req.query.date.toString();
+     billboard('radio-songs', dateString, function(songs, err){
+         console.log(date);
+        if(err){
+            console.log(err)
+        } else {
+            res.send(songs.slice(0, 10));
+        }
+    })
+ })
+
 
 function init(){
     var spotifyApi = new SpotifyWebApi({
-    clientId : clientID,
-    clientSecret : clientSecret
+    clientId : "3b6549a0623b403e89dc4625b9a9e0ae",
+    clientSecret : "1e2230bc246840cab4e3412883e83f18"
     });
      
     // Retrieve an access token.
     spotifyApi.clientCredentialsGrant()
       .then(function(data) {
+        console.log('The access token expires in ' + data.body['expires_in']);
+        console.log('The access token is ' + data.body['access_token']);
         token = data.body['access_token'];
      
         // Save the access token so that it's used in future calls
