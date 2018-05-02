@@ -4,6 +4,7 @@ $(document).ready(function(){
 	const spotifyUrl = "https://api.spotify.com/v1/"
 	const headIcon = "<i class='fas fa-headphones'></i>";
 	const spotIcon = "<i class='fab fa-spotify'></i>";
+	let billboard = require("billboard-top-100").getChart;
 	let idUrl;
 	let artistUrl;
 	let accessToken = [];
@@ -22,6 +23,12 @@ $(document).ready(function(){
 	let currentlyPlaying;
 	let songs = [];
 	let audio = [];
+
+	billboard('billboard-200', '2013-05-24', function(songs, err){
+    if (err) console.log(err);
+    console.log(songs[3]); //prints array of top 100 songs
+
+});
 
 //Button event handlers
 	$(".buttonSubmit").on("click", function(){
