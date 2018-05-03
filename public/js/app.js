@@ -84,8 +84,8 @@ $(document).ready(function(){
 
 	function playAudio(){
 		if(currentlyPlaying){
-			currentSong = songs[0][currentButton - 1].song_name;
-			currentArtist = songs[0][currentButton - 1].display_artist;
+			currentSong = songs[0][currentButton - 1].title;
+			currentArtist = songs[0][currentButton - 1].artist;
 			let canPlay = $(currentlyPlaying).attr("src");
 			if(canPlay != "null"){
 				$(".infoText").empty();
@@ -103,14 +103,13 @@ $(document).ready(function(){
 	function getCharts(index){
 		$(".infoText").removeClass("scroll");
 		$(".infoText").empty();
-		$(".infoText").append("Loading Song " + (audio.length + 1) + "/10");
+		$(".infoText").append("Loading Songs");
 		$(".infoText").addClass("loading");
 		$.ajax({
 			method: "GET",
 			url: "/billboard",
 			data: {date: currentDate},
 			success: function(data){
-				console.log("done");
 				songs.push(data);
 				getAudio();
 			}
@@ -118,11 +117,16 @@ $(document).ready(function(){
 	}
 
 	function getAudio(){
-		console.log(songs);
 		songName = songs[0][audioCounter].title;
+		formatSong = songName.replace(/\s+/g, '+');
 		artistName = songs[0][audioCounter].artist;
-		artist = artistName.replace(/\s+/g, '+');
-		artistUrl = spotifyUrl + "search?q=track:" + songName + '%20artist:' + artist + "&type=track&limit=1" + "&market=US";
+		formatArtist = artistName.match(/.+?(?= Featuring)/);
+		if(formatArtist){
+			artist = formatArtist[0].replace(/\s+/g, '+');
+		} else {
+			artist = artistName.replace(/\s+/g, '+');
+		}
+		artistUrl = spotifyUrl + "search?q=track:" + formatSong + '%20artist:' + artist + "&type=track&limit=1" + "&market=US";
 		$.ajax({
 			type: "GET",
 			url: artistUrl,
@@ -144,11 +148,7 @@ $(document).ready(function(){
 
 	function getDates(){
 		date = new Date(value);
-		isoDate = new Date(value);
-		newDate = isoDate.setDate(isoDate.getDate() + 7);
-		currentDate = date.toISOString().substring(0, 10).replace(/-0+/g, '-');
-		newIsoDate = new Date(newDate);
-		futureDate = newIsoDate.toISOString().substring(0, 10).replace(/-0+/g, '-');
+		currentDate = date.toISOString().substring(0, 10);
 		getCharts()
 	}
 
@@ -166,9 +166,7 @@ $(document).ready(function(){
 	function checkAudio(){
 		for(var i = 1; i <= songs[0].length; i++){
 			let j = i - 1;
-			console.log(audio);
 			keyLength = Object.keys(audio[j]).length;
-			console.log(songs[0][j]);
 			$(".title" + i).append(songs[0][j].title.substring(0, 35));
 			$(".artist" + i).append(songs[0][j].artist.substring(0, 25));
 			if(keyLength > 2 && audio[j].external_urls.spotify){

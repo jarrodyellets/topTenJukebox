@@ -29,7 +29,6 @@ app.get('/token', function(req, res){
 app.get('/billboard', function(req, res){
     var dateString = req.query.date.toString();
      billboard('radio-songs', dateString, function(songs, err){
-         console.log(date);
         if(err){
             console.log(err)
         } else {
@@ -41,8 +40,8 @@ app.get('/billboard', function(req, res){
 
 function init(){
     var spotifyApi = new SpotifyWebApi({
-    clientId : "3b6549a0623b403e89dc4625b9a9e0ae",
-    clientSecret : "1e2230bc246840cab4e3412883e83f18"
+    clientId : clientID,
+    clientSecret : clientSecret
     });
      
     // Retrieve an access token.
