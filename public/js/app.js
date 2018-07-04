@@ -1,23 +1,14 @@
 $(document).ready(function(){
-  const billboardUrl = "http://billboard.modulo.site/rank/song/";
-  const proxy = "https://cors-anywhere.herokuapp.com/";
   const spotifyUrl = "https://api.spotify.com/v1/"
   const headIcon = "<i class='fas fa-headphones'></i>";
   const spotIcon = "<i class='fab fa-spotify'></i>";
-  let idUrl;
   let artistUrl;
   let accessToken = [];
   let currentButton;
   let currentSong;
   let currentArtist;
-  let isoDate;
-  let newDate;
-  let newIsoDate;
   let currentDate
-  let futureDate;
-  let index = 1;
   let audioCounter = 0;
-  let songId;
   let value;
   let keyLength;
   let currentlyPlaying;
