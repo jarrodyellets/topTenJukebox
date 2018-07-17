@@ -30,7 +30,7 @@ app.get('/token', function(req, res){
 app.get('/billboard', function(req, res){
   listCharts(function(data){
     console.log(data);
-  }
+  });
   var dateString = req.query.date.toString();
   billboard('radio-songs', dateString, function(songs, err){
     if(err){
